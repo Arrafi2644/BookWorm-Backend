@@ -8,7 +8,14 @@ import { sendResponse } from '../../utils/sendResponse';
 import { JwtPayload } from 'jsonwebtoken';
 
 const createUser = catchAsync(async (req: Request, res: Response) => {
-    const user = await UserServices.createUserService(req.body)
+    const payload = req.body;
+    
+    // Get picture URL from multer file upload
+    if (req.file) {
+        payload.picture = (req.file as any).path;
+    }
+
+    const user = await UserServices.createUserService(payload)
     
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
@@ -58,6 +65,11 @@ const deleteUser = catchAsync(async (req: Request, res: Response, next: NextFunc
 const updateUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.params.id as string;
     const payload = req.body;
+    
+    // Get picture URL from multer file upload if new image is uploaded
+    if (req.file) {
+        payload.picture = (req.file as any).path;
+    }
 
     const verifiedToken = req.user;
 
