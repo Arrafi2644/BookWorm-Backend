@@ -6,6 +6,8 @@ import mongoose from 'mongoose';
 import { JwtPayload } from 'jsonwebtoken';
 import { envVars } from '../../config/env';
 import { User } from './user.model';
+import { userSearchableFields } from './user.constants';
+import { QueryBuilder } from '../../utils/QueryBuilder';
 
 const createUserService = async (payload: Partial<IUser>) => {
     const { email, password, ...rest } = payload;
@@ -96,10 +98,32 @@ const updateUser = async (
     return updatedUser;
 };
 
+const getAllUsers = async (query: Record<string, string>) => {
+
+    const queryBuilder = new QueryBuilder(User.find(), query)
+    const usersData = queryBuilder
+        .filter()
+        .search(userSearchableFields)
+        .sort()
+        .fields()
+        .paginate();
+
+    const [data, meta] = await Promise.all([
+        usersData.build(),
+        queryBuilder.getMeta()
+    ])
+
+    return {
+        data,
+        meta
+    }
+};
+
 export const UserServices = {
     createUserService,
     getMe,
     getSingleUser,
     deleteUser,
-    updateUser
+    updateUser,
+    getAllUsers
 }
