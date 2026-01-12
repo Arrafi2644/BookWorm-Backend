@@ -3,6 +3,7 @@ import httpStatus from "http-status-codes";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { BookServices } from "./book.service";
+import { JwtPayload } from "jsonwebtoken";
 
 const createBook = catchAsync(async (req: Request, res: Response) => {
     const payload = req.body;
@@ -19,7 +20,7 @@ const createBook = catchAsync(async (req: Request, res: Response) => {
         message: "Book created successfully",
         data: book,
     });
-});  
+});
 
 const getAllBooks = catchAsync(async (req: Request, res: Response) => {
     const books = await BookServices.getAllBooks();
@@ -45,7 +46,7 @@ const getSingleBook = catchAsync(async (req: Request, res: Response) => {
 const updateBook = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const payload = req.body;
-    
+
     // Get cover image URL from multer file upload if new image is uploaded
     if (req.file) {
         payload.coverImage = (req.file as any).path;
@@ -71,10 +72,27 @@ const deleteBook = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getPersonalizedRecommendations = catchAsync(
+    async (req: Request, res: Response) => {
+        const decodedToken = req.user as JwtPayload;
+        const recommendations = await BookServices.getPersonalizedRecommendations(
+            decodedToken
+        );
+
+        sendResponse(res, {
+            statusCode: httpStatus.OK,
+            success: true,
+            message: "Personalized recommendations fetched successfully",
+            data: recommendations,
+        });
+    }
+);
+
 export const BookControllers = {
     createBook,
     getAllBooks,
     getSingleBook,
     updateBook,
     deleteBook,
+    getPersonalizedRecommendations,
 };

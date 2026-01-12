@@ -5,6 +5,7 @@ import { genreRoutes } from "../modules/genre/genre.route";
 import { bookRoutes } from "../modules/book/book.route";
 import { reviewRoutes } from "../modules/review/review.route";
 import { shelfRoutes } from "../modules/shelf/shelf.route";
+import { tutorialRoutes } from "../modules/tutorial/tutorial.route";
 
 
 export const router = Router();
@@ -33,6 +34,10 @@ const moduleRoutes = [
     {
         path: "/shelf",
         route: shelfRoutes
+    },
+    {
+        path: "/tutorial",
+        route: tutorialRoutes
     }
 ]
 
