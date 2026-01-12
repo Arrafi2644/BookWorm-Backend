@@ -6,6 +6,7 @@ import { bookRoutes } from "../modules/book/book.route";
 import { reviewRoutes } from "../modules/review/review.route";
 import { shelfRoutes } from "../modules/shelf/shelf.route";
 import { tutorialRoutes } from "../modules/tutorial/tutorial.route";
+import { adminAnalyticsRoutes } from "../modules/analytics/adminAnalytics.route";
 
 
 export const router = Router();
@@ -38,6 +39,10 @@ const moduleRoutes = [
     {
         path: "/tutorial",
         route: tutorialRoutes
+    },
+    {
+        path: "/admin-analytics",
+        route: adminAnalyticsRoutes
     }
 ]
 
