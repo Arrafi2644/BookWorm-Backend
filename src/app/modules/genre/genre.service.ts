@@ -2,6 +2,8 @@ import httpStatus from 'http-status-codes';
 import { IGenre } from "./genre.interface";
 import AppError from '../../errorHelpers/appError';
 import { Genre } from './genre.model';
+import { QueryBuilder } from '../../utils/QueryBuilder';
+import { genreSearchableFields } from './genre.constants';
 
 const createGenre = async (payload: Partial<IGenre>) => {
     const { name } = payload;
@@ -17,9 +19,25 @@ const createGenre = async (payload: Partial<IGenre>) => {
     return genre;
 };
 
-const getAllGenres = async () => {
-    const genres = await Genre.find();
-    return genres;
+const getAllGenres = async (query: Record<string, string>) => {
+    const queryBuilder = new QueryBuilder(Genre.find(), query);
+    
+    const genresData = queryBuilder
+        .filter()
+        .search(genreSearchableFields)
+        .sort()
+        .fields()
+        .paginate();
+
+    const [data, meta] = await Promise.all([
+        genresData.build(),
+        queryBuilder.getMeta()
+    ]);
+
+    return {
+        data,
+        meta
+    };
 };
 
 const getSingleGenre = async (id: string) => {

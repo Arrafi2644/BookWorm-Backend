@@ -19,12 +19,14 @@ const createTutorial = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllTutorials = catchAsync(async (req: Request, res: Response) => {
-    const tutorials = await TutorialServices.getAllTutorials();
+    const query = req.query;
+    const result = await TutorialServices.getAllTutorials(query as Record<string, string>);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Tutorials retrieved successfully",
-        data: tutorials,
+        data: result.data,
+        meta: result.meta,
     });
 });
 

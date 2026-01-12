@@ -3,6 +3,8 @@ import { JwtPayload } from "jsonwebtoken";
 import AppError from "../../errorHelpers/appError";
 import { ITutorial } from "./tutorial.interface";
 import { Tutorial } from "./tutorial.model";
+import { QueryBuilder } from '../../utils/QueryBuilder';
+import { tutorialSearchableFields } from './tutorial.constants';
 
 const createTutorial = async (payload: ITutorial, decodedToken: JwtPayload) => {
     const tutorial = await Tutorial.create({
@@ -13,10 +15,28 @@ const createTutorial = async (payload: ITutorial, decodedToken: JwtPayload) => {
     return tutorial.populate("createdBy", "name email role");
 };
 
-const getAllTutorials = async () => {
-    return Tutorial.find()
-        .populate("createdBy", "name email role")
-        .sort({ createdAt: -1 });
+const getAllTutorials = async (query: Record<string, string>) => {
+    const queryBuilder = new QueryBuilder(
+        Tutorial.find().populate("createdBy", "name email role"),
+        query
+    );
+    
+    const tutorialsData = queryBuilder
+        .filter()
+        .search(tutorialSearchableFields)
+        .sort()
+        .fields()
+        .paginate();
+
+    const [data, meta] = await Promise.all([
+        tutorialsData.build(),
+        queryBuilder.getMeta()
+    ]);
+
+    return {
+        data,
+        meta
+    };
 };
 
 const getSingleTutorial = async (id: string) => {

@@ -7,6 +7,8 @@ import { Shelf } from "../shelf/shelf.model";
 import { Review } from "../review/review.model";
 import { JwtPayload } from "jsonwebtoken";
 import { Types } from "mongoose";
+import { QueryBuilder } from '../../utils/QueryBuilder';
+import { bookSearchableFields } from './book.constants';
 
 const createBook = async (payload: Partial<IBook>) => {
     const { genre } = payload;
@@ -25,11 +27,28 @@ const createBook = async (payload: Partial<IBook>) => {
     return book;
 };
 
-const getAllBooks = async () => {
-    const books = await Book.find()
-        .populate("genre", "name description")
-        .sort({ createdAt: -1 });
-    return books;
+const getAllBooks = async (query: Record<string, string>) => {
+    const queryBuilder = new QueryBuilder(
+        Book.find().populate("genre", "name description"),
+        query
+    );
+    
+    const booksData = queryBuilder
+        .filter()
+        .search(bookSearchableFields)
+        .sort()
+        .fields()
+        .paginate();
+
+    const [data, meta] = await Promise.all([
+        booksData.build(),
+        queryBuilder.getMeta()
+    ]);
+
+    return {
+        data,
+        meta
+    };
 };
 
 const getSingleBook = async (id: string) => {

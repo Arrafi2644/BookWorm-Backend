@@ -4,6 +4,8 @@ import { Review } from "./review.model";
 import AppError from "../../errorHelpers/appError";
 import { Role } from "../user/user.interface";
 import httpStatus from "http-status-codes";
+import { QueryBuilder } from '../../utils/QueryBuilder';
+import { reviewSearchableFields } from './review.constants';
 
 const createReview = async (userId: string, bookId: string, rating: number, comment: string, status: "pending" | "approved") => {
     const isAlreadyReviewed = await Review.findOne({ userId, bookId });
@@ -20,9 +22,25 @@ const createReview = async (userId: string, bookId: string, rating: number, comm
     return review;
 };
 
-const getAllReviews = async () => {
-    const reviews = await Review.find();
-    return reviews;
+const getAllReviews = async (query: Record<string, string>) => {
+    const queryBuilder = new QueryBuilder(Review.find(), query);
+    
+    const reviewsData = queryBuilder
+        .filter()
+        .search(reviewSearchableFields)
+        .sort()
+        .fields()
+        .paginate();
+
+    const [data, meta] = await Promise.all([
+        reviewsData.build(),
+        queryBuilder.getMeta()
+    ]);
+
+    return {
+        data,
+        meta
+    };
 };
 
 const getSingleReview = async (id: string) => {

@@ -23,12 +23,14 @@ const createBook = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllBooks = catchAsync(async (req: Request, res: Response) => {
-    const books = await BookServices.getAllBooks();
+    const query = req.query;
+    const result = await BookServices.getAllBooks(query as Record<string, string>);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Books retrieved successfully",
-        data: books,
+        data: result.data,
+        meta: result.meta,
     });
 });
 

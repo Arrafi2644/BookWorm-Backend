@@ -15,12 +15,14 @@ const createGenre = catchAsync(async (req: Request, res: Response) => {
 });  
 
 const getAllGenres = catchAsync(async (req: Request, res: Response) => {
-    const genres = await GenreServices.getAllGenres();
+    const query = req.query;
+    const result = await GenreServices.getAllGenres(query as Record<string, string>);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Genres retrieved successfully",
-        data: genres,
+        data: result.data,
+        meta: result.meta,
     });
 });
 
